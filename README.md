@@ -16,5 +16,5 @@ TR:
 UYARI
 * commodities_scraper kütüphanesi tarafından sağlanan bilgiler yalnızca eğitim amaçlıdır ve yatırım tavsiyesi niteliğinde değildir,
 Bu tür bilgi veya hizmetlere güvenilmesinden kaynaklanan herhangi bir kayıp veya hasara ilişkin herhangi bir sorumluluk kabul etmiyoruz. .
-* Verilerimiz https://www.fxempire.com/commodities'e bağlıdır
+* Verilerimiz https://www.fxempire.com/commodities sitesine bağlıdır
 
