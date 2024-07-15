@@ -2,6 +2,7 @@ import requests
 import matplotlib.pyplot as plt
 import json
 import pandas as pd
+import logging
 from datetime import datetime
 import seaborn as sns
 
@@ -130,11 +131,10 @@ def analyze_investment(df):
 
     return "----------------------------------------"
 
-def save_to_excel(self, file_path):
-        try:
-            self.data.to_excel(file_path, index=False)
-            self.logger.info(f"Data saved to {file_path}")
-        except Exception as e:
-            self.logger.error(f"An error occurred while saving data to Excel: {e}")
+def save_to_excel(df, file_path):
+    try:
+        df.to_excel(file_path, index=False)
+        logging.info(f"Data saved to {file_path}")
+    except Exception as e:
+        logging.error(f"An error occurred while saving data to Excel: {e}")
 
-            
