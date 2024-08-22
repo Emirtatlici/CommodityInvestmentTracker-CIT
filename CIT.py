@@ -70,137 +70,86 @@ class CommodityInvestmentTracker:
 
         return df
 
-    def calculate_investment_value(self, df: pd.DataFrame, start_date: str, initial_investment: float = 100) -> pd.DataFrame:
+
+    def analyze_investment(self, df: pd.DataFrame, start_date: str, initial_investment: float = 100, end_date: str = None) -> Dict[str, Any]:
         start_date = pd.to_datetime(start_date, format='%d-%m-%Y')
+        
+        if end_date is None:
+            end_date = pd.to_datetime('today')
+        else:
+            end_date = pd.to_datetime(end_date, format='%d-%m-%Y')
+        
         df.index = pd.to_datetime(df.index, format='%d-%m-%Y')
         
-        start_price = df.loc[df.index >= start_date].iloc[0, 0]
+        df_filtered = df[(df.index >= start_date) & (df.index <= end_date)]
+        
+        if df_filtered.empty:
+            raise ValueError("No data available in the specified date range.")
+        
+        start_price = df_filtered.iloc[0, 0]
         units_bought = initial_investment / start_price
         
-        df['Investment_Value'] = df.iloc[:, 0] * units_bought
-        return df
-
-    def analyze_single_investment(self, df: pd.DataFrame, start_date: str) -> Dict[str, Any]:
-        start_date = pd.to_datetime(start_date, format='%d-%m-%Y')
-        df_after_start = df[df.index >= start_date]
-
-        if df_after_start.empty:
-            raise ValueError("No data available after the specified start date.")
-
-        initial_value = 100  # Assuming $100 initial investment
-        min_value_after_start = df_after_start['Investment_Value'].min()
-        max_value = df_after_start['Investment_Value'].max()
-        final_value = df_after_start['Investment_Value'].iloc[-1]
-        total_return = final_value - initial_value
-        years = (df_after_start.index[-1] - start_date).days / 365.25
-        annualized_return = (final_value / initial_value) ** (1 / years) - 1 if years > 0 else 0
-
-        return {
-            "min_after_start": min_value_after_start,
-            "max": max_value,
-            "final_value": final_value,
-            "total_return": total_return,
-            "annualized_return": annualized_return,
-        }
-
-    # def analyze_periodic_investment(self, df: pd.DataFrame, start_date: str, end_date: str, interval_days: int, investment_amount: float) -> Dict[str, Any]:
-    #     start_date = pd.to_datetime(start_date, format='%d-%m-%Y')
-    #     end_date = pd.to_datetime(end_date, format='%d-%m-%Y')
-    #     df.index = pd.to_datetime(df.index, format='%d-%m-%Y')
+        df_filtered['Investment_Value'] = df_filtered.iloc[:, 0] * units_bought
         
-    #     df = df[(df.index >= start_date) & (df.index <= end_date)]
-        
-    #     if df.empty:
-    #         raise ValueError("No data available for the specified date range.")
+        min_value_after_start = df_filtered['Investment_Value'].min()
+        max_value = df_filtered['Investment_Value'].max()
+        final_value = df_filtered['Investment_Value'].iloc[-1]
+        total_return = final_value - initial_investment
+        years = (end_date - start_date).days / 365.25
+        annualized_return = (final_value / initial_investment) ** (1 / years) - 1 if years > 0 else 0
 
-    #     investment_dates = pd.date_range(start=start_date, end=end_date, freq=f'{interval_days}D')
-    #     total_invested = 0
-    #     units_bought = 0
-    #     investment_growth = []
+        plt.figure(figsize=(15, 10))
 
-    #     for date in investment_dates:
-    #         if date in df.index:
-    #             price = df.loc[date].iloc[0]
-    #             units_bought += investment_amount / price
-    #             total_invested += investment_amount
-    #             current_value = units_bought * price
-    #             investment_growth.append({'Date': date, 'Value': current_value, 'Total_Invested': total_invested})
+        metrics_text = (f"Initial Investment: ${initial_investment:.2f}\n"
+                        f"Final Value: ${final_value:.2f}\n"
+                        f"Total Return: ${total_return:.2f}\n"
+                        f"Annualized Return: {annualized_return:.2%}")
+        plt.suptitle(f"Investment Analysis from {start_date.strftime('%d-%m-%Y')} to {end_date.strftime('%d-%m-%Y')}\n{metrics_text}", fontsize=12, fontweight='bold')
 
-    #     growth_df = pd.DataFrame(investment_growth)
-    #     growth_df.set_index('Date', inplace=True)
+        plt.subplot(2, 2, 1)
+        plt.plot(df_filtered.index, df_filtered.iloc[:, 0], label='Price')
+        plt.title('Price Over Time')
+        plt.xlabel('Date')
+        plt.ylabel('Price (USD)')
+        plt.legend()
 
-    #     final_value = units_bought * df.iloc[-1].iloc[0]
-    #     total_return = final_value - total_invested
-    #     years = (end_date - start_date).days / 365.25
-    #     annualized_return = (final_value / total_invested) ** (1 / years) - 1 if years > 0 else 0
+        plt.subplot(2, 2, 2)
+        plt.plot(df_filtered.index, df_filtered['Investment_Value'], label='Investment Value', color='green')
+        plt.title('Investment Value Over Time')
+        plt.xlabel('Date')
+        plt.ylabel('Value (USD)')
+        plt.legend()
 
-    #     return {
-    #         "total_invested": total_invested,
-    #         "final_value": final_value,
-    #         "total_return": total_return,
-    #         "annualized_return": annualized_return,
-    #         "growth_df": growth_df
-    #     }
+        plt.subplot(2, 2, 3)
+        rolling_window = 30
+        df_filtered['Rolling_Mean'] = df_filtered.iloc[:, 0].rolling(window=rolling_window).mean()
+        df_filtered['Rolling_STD'] = df_filtered.iloc[:, 0].rolling(window=rolling_window).std()
+        plt.plot(df_filtered.index, df_filtered['Rolling_Mean'], label='Rolling Mean', color='orange')
+        plt.plot(df_filtered.index, df_filtered['Rolling_STD'], label='Rolling Standard Deviation', color='purple')
+        plt.title(f'Rolling Mean and Std Dev ({rolling_window}-Days)')
+        plt.xlabel('Date')
+        plt.ylabel('Value')
+        plt.legend()
 
-    # def plot_periodic_investment_analysis(self, df: pd.DataFrame, periodic_analysis: Dict[str, Any], commodity_type: str):
-    #     plt.figure(figsize=(15, 10))
-        
-    #     metrics_text = (f"Periodic Investment Analysis:\n"
-    #                     f"Total Invested: ${periodic_analysis['total_invested']:.2f}\n"
-    #                     f"Final Value: ${periodic_analysis['final_value']:.2f}\n"
-    #                     f"Total Return: ${periodic_analysis['total_return']:.2f}\n"
-    #                     f"Annualized Return: {periodic_analysis['annualized_return']:.2%}")
+        plt.subplot(2, 2, 4)
+        df_filtered['Daily_Returns'] = df_filtered.iloc[:, 0].pct_change() * 100
+        df_filtered['Month'] = df_filtered.index.month
+        df_filtered['Year'] = df_filtered.index.year
+        heatmap_data = df_filtered.pivot_table(values='Daily_Returns', index='Year', columns='Month', aggfunc='mean')
+        sns.heatmap(heatmap_data, cmap='coolwarm', annot=True, fmt=".2f")
+        plt.title('Heatmap of Monthly Mean Daily Returns')
+        plt.xlabel('Month')
+        plt.ylabel('Year')
+        plt.xticks(ticks=range(12), labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 
-    #     plt.suptitle(f"{commodity_type.capitalize()} Investment Analysis\n{metrics_text}", fontsize=12, fontweight='bold')
+        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        plt.show()
 
-    #     # Commodity price over time
-    #     plt.subplot(2, 2, 1)
-    #     plt.plot(df.index, df.iloc[:, 0], label='Price')
-    #     plt.title(f'{commodity_type.capitalize()} Price Over Time')
-    #     plt.xlabel('Date')
-    #     plt.ylabel('Price (USD)')
-    #     plt.legend()
+        return "Analysis Completed"    
 
-    #     # Investment growth over time
-    #     plt.subplot(2, 2, 2)
-    #     growth_df = periodic_analysis['growth_df']
-    #     plt.plot(growth_df.index, growth_df['Value'], label='Investment Value', color='green')
-    #     plt.plot(growth_df.index, growth_df['Total_Invested'], label='Total Invested', color='red', linestyle='--')
-    #     plt.title('Periodic Investment Growth Over Time')
-    #     plt.xlabel('Date')
-    #     plt.ylabel('Value (USD)')
-    #     plt.legend()
-
-    #     # Rolling mean and standard deviation
-    #     plt.subplot(2, 2, 3)
-    #     rolling_window = 30
-    #     df['Rolling_Mean'] = df.iloc[:, 0].rolling(window=rolling_window).mean()
-    #     df['Rolling_STD'] = df.iloc[:, 0].rolling(window=rolling_window).std()
-    #     plt.plot(df.index, df['Rolling_Mean'], label='Rolling Mean', color='orange')
-    #     plt.plot(df.index, df['Rolling_STD'], label='Rolling Std Dev', color='purple')
-    #     plt.title(f'Rolling Mean and Std Dev ({rolling_window}-day)')
-    #     plt.xlabel('Date')
-    #     plt.ylabel('Value')
-    #     plt.legend()
-
-    #     # Heatmap of mean daily returns
-    #     plt.subplot(2, 2, 4)
-    #     df['Daily_Returns'] = df.iloc[:, 0].pct_change() * 100
-    #     df['Month'] = df.index.month
-    #     df['Year'] = df.index.year
-    #     heatmap_data = df.pivot_table(values='Daily_Returns', index='Year', columns='Month', aggfunc='mean')
-    #     sns.heatmap(heatmap_data, cmap='coolwarm', annot=True, fmt=".2f")
-    #     plt.title('Heatmap of Mean Daily Returns by Month')
-    #     plt.xlabel('Month')
-    #     plt.ylabel('Year')
-    #     plt.xticks(ticks=range(12), labels=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
-        
-    #     plt.tight_layout(rect=[0, 0, 1, 0.96])
-    #     plt.show()
     def analyze_and_plot_periodic_investment(self, df: pd.DataFrame, start_date: str, end_date: str, 
                                              interval_days: int, investment_amount: float, 
                                              commodity_type: str) -> Dict[str, Any]:
-        # Veri hazırlığı ve analiz
         start_date = pd.to_datetime(start_date, format='%d-%m-%Y')
         end_date = pd.to_datetime(end_date, format='%d-%m-%Y')
         df.index = pd.to_datetime(df.index, format='%d-%m-%Y')
@@ -249,7 +198,7 @@ class CommodityInvestmentTracker:
         plt.legend()
 
         plt.subplot(2, 2, 2)
-        plt.plot(growth_df.index, growth_df['Value'], label='Investmen Value', color='green')
+        plt.plot(growth_df.index, growth_df['Value'], label='Investment Value', color='green')
         plt.plot(growth_df.index, growth_df['Total_Invested'], label='Total Invested', color='red', linestyle='--')
         plt.title('Periodical Investment Growth In time')
         plt.xlabel('Date')
@@ -281,13 +230,9 @@ class CommodityInvestmentTracker:
         plt.tight_layout(rect=[0, 0, 1, 0.96])
         plt.show()
 
-        return {
-            "total_invested": total_invested,
-            "final_value": final_value,
-            "total_return": total_return,
-            "annualized_return": annualized_return,
-            "growth_df": growth_df
-        }
+        return "Analysis Completed"
+        
+   
 
     def save_to_excel(self, df: pd.DataFrame, file_path: str):
         try:
