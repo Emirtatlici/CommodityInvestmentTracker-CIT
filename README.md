@@ -1,4 +1,4 @@
-Welcome to CIT(Commodity Investment Track) Library
+Welcome to CIT(Commodity Investment Tracker) Library
 In this library, you can extract gold and silver prices and Track your investments from a desired start date until today.
 
 Features
