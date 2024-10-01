@@ -1,4 +1,3 @@
-# data_fetcher.py
 from fredapi import Fred
 from config import FRED_API_KEY
 import pandas as pd
@@ -37,7 +36,7 @@ def calculate_monotonic_relationships(commodity_data, economic_series_ids):
         economic_data = get_economic_data(series_id, start_date='2000-01-01')
 
         if economic_data is None:
-            continue  # Skip this series if data could not be fetched
+            continue  
 
         date_col = economic_data.columns[economic_data.columns.str.lower() == 'date'][0]
         economic_data[date_col] = pd.to_datetime(economic_data[date_col])
@@ -55,13 +54,10 @@ def calculate_monotonic_relationships(commodity_data, economic_series_ids):
     return top_increasing, top_decreasing
 
 def visualize_relationships(top_increasing, top_decreasing):
-    # Set the style for a more modern look
     sns.set_style("whitegrid")
     
-    # Create a figure with two subplots side by side
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
     
-    # Function to add value labels to the bars
     def add_value_labels(ax, spacing=0.01):
         for rect in ax.patches:
             value = rect.get_width()
@@ -71,7 +67,6 @@ def visualize_relationships(top_increasing, top_decreasing):
             ha = 'left' if value >= 0 else 'right'
             ax.text(x + np.sign(x) * spacing, y, text, ha=ha, va='center')
 
-    # Plot top increasing relationships
     sns.barplot(x=top_increasing.values, y=top_increasing.index, ax=ax1, palette='YlOrRd')
     ax1.set_title('Top 10 Increasing Relationships', fontsize=16, fontweight='bold')
     ax1.set_xlabel('Spearman Correlation Coefficient', fontsize=12)
@@ -79,7 +74,6 @@ def visualize_relationships(top_increasing, top_decreasing):
     ax1.axvline(0, color='grey', lw=1, linestyle='--')
     add_value_labels(ax1)
 
-    # Plot top decreasing relationships
     sns.barplot(x=top_decreasing.values, y=top_decreasing.index, ax=ax2, palette='YlGnBu_r')
     ax2.set_title('Top 10 Decreasing Relationships', fontsize=16, fontweight='bold')
     ax2.set_xlabel('Spearman Correlation Coefficient', fontsize=12)
@@ -87,11 +81,9 @@ def visualize_relationships(top_increasing, top_decreasing):
     ax2.axvline(0, color='grey', lw=1, linestyle='--')
     add_value_labels(ax2)
 
-    # Adjust layout and add a main title
     plt.tight_layout()
     fig.suptitle('Top Increasing and Decreasing Relationships', fontsize=20, fontweight='bold', y=1.05)
 
-    # Add a legend for color interpretation
     sm1 = plt.cm.ScalarMappable(cmap='YlOrRd', norm=plt.Normalize(vmin=0, vmax=1))
     sm2 = plt.cm.ScalarMappable(cmap='YlGnBu_r', norm=plt.Normalize(vmin=-1, vmax=0))
     cbar1 = fig.colorbar(sm1, ax=ax1, orientation='horizontal', pad=0.08, aspect=30)
