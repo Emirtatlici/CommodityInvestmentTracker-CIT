@@ -1,4 +1,5 @@
-Commodity Investment Tracker (CIT) Library
+** Commodity Investment Tracker (CIT) Library
+
 Welcome to the Commodity Investment Tracker (CIT) library! This project is a comprehensive solution for extracting historical Gold and Silver prices, tracking investments, and analyzing financial performance against major economic indexes.
 
 The CIT library enables you to:
