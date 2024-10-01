@@ -51,11 +51,11 @@ TR: UYARI
 CIT kütüphanesi tarafından sağlanan bilgiler yalnızca eğitim amaçlıdır ve yatırım tavsiyesi niteliğinde değildir, Bu tür bilgi veya hizmetlere güvenilmesinden kaynaklanan herhangi bir kayıp veya hasara ilişkin herhangi bir sorumluluk kabul etmiyoruz. 
 Kütüphanenin çektiği Verilerin doğruluğu https://www.fxempire.com/commodities  sitesine ve https://fred.stlouisfed.org Sitesinin API sistemine bağlıdır
 
-🛠️ Contribution
+#### 🛠️ Contribution
 Contributions are welcome! Feel free to open issues or submit pull requests to enhance the project.
 
-📄 License
+#### 📄 License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-📬 Contact
+#### 📬 Contact
 You can reach out to me at linkedin.com/in/emir-tatlici
