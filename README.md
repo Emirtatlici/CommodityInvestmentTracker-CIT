@@ -44,9 +44,12 @@ WARNING: You need to gather an API key from https://fred.stlouisfed.org for free
 
 ⚠️ Disclaimer
 
+## EN: WARNING
 The information provided by the CIT library is for educational purposes only and does not constitute investment advice. We do not accept any liability for any loss or damage whatsoever caused in reliance upon such information or services.
 Our data depends on https://www.fxempire.com/commodities and API of https://fred.stlouisfed.org/
-TR: UYARI
+
+
+## TR: UYARI
 
 CIT kütüphanesi tarafından sağlanan bilgiler yalnızca eğitim amaçlıdır ve yatırım tavsiyesi niteliğinde değildir, Bu tür bilgi veya hizmetlere güvenilmesinden kaynaklanan herhangi bir kayıp veya hasara ilişkin herhangi bir sorumluluk kabul etmiyoruz. 
 Kütüphanenin çektiği Verilerin doğruluğu https://www.fxempire.com/commodities  sitesine ve https://fred.stlouisfed.org Sitesinin API sistemine bağlıdır
