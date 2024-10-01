@@ -39,33 +39,15 @@ Compare Gold and Silver prices over specific time periods to gain insights into 
 Economic Correlation Studies:
 Understand how commodity prices relate to broader economic indicators, identifying trends and relationships.
 
-🚀 Setup and Installation
-Clone the repository:
-bash
-Copy code
-git clone https://github.com/your-username/commodity-investment-tracker.git
-Navigate into the project directory:
-bash
-Copy code
-cd commodity-investment-tracker
-Install the required dependencies:
-bash
-Copy code
-pip install -r requirements.txt
-Run the main script to start tracking:
-bash
-Copy code
-python main.py
-⚠️ Disclaimer
-The information provided by the CIT Library is for educational purposes only and does not constitute investment advice.
-We do not accept any liability for any loss or damage caused in reliance upon such information or services.
 
-Data Source:
-Our data depends on FX Empire.
+⚠️ Disclaimer
+
+The information provided by the CIT library is for educational purposes only and does not constitute investment advice. We do not accept any liability for any loss or damage whatsoever caused in reliance upon such information or services.
+Our data depends on https://www.fxempire.com/commodities and API of https://fred.stlouisfed.org/
 TR: UYARI
-commodities_scraper kütüphanesi tarafından sağlanan bilgiler yalnızca eğitim amaçlıdır ve yatırım tavsiyesi niteliğinde değildir.
-Bu tür bilgi veya hizmetlere güvenilmesinden kaynaklanan herhangi bir kayıp veya hasara ilişkin herhangi bir sorumluluk kabul etmiyoruz.
-Verilerimiz FX Empire sitesine bağlıdır.
+
+CIT kütüphanesi tarafından sağlanan bilgiler yalnızca eğitim amaçlıdır ve yatırım tavsiyesi niteliğinde değildir, Bu tür bilgi veya hizmetlere güvenilmesinden kaynaklanan herhangi bir kayıp veya hasara ilişkin herhangi bir sorumluluk kabul etmiyoruz. 
+Kütüphanenin çektiği Verilerin doğruluğu https://www.fxempire.com/commodities  sitesine ve https://fred.stlouisfed.org Sitesinin API sistemine bağlıdır
 
 🛠️ Contribution
 Contributions are welcome! Feel free to open issues or submit pull requests to enhance the project.
@@ -74,3 +56,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests to e
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 📬 Contact
+You can reach out to me at linkedin.com/in/emir-tatlici
