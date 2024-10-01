@@ -40,6 +40,7 @@ Compare Gold and Silver prices over specific time periods to gain insights into 
 Economic Correlation Studies:
 Understand how commodity prices relate to broader economic indicators, identifying trends and relationships.
 
+WARNING: You need to gather an API key from https://fred.stlouisfed.org for free to gather index data otherwise you will encounter errors.
 
 ⚠️ Disclaimer
 
