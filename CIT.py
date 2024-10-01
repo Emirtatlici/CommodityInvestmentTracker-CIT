@@ -8,6 +8,12 @@ from typing import Dict, Any
 from colorama import Fore, Style, init
 import argparse
 import matplotlib.dates as mdates
+from data_fetcher import get_economic_data,calculate_monotonic_relationships,visualize_relationships
+from sklearn.preprocessing import MinMaxScaler
+from matplotlib.ticker import FuncFormatter
+import warnings
+warnings.filterwarnings("ignore")
+
 pd.options.mode.chained_assignment = None 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -318,3 +324,92 @@ def main():
     while True:
         print(f"\n{Fore.CYAN}What would you like to do?{Style.RESET_ALL}")
         print("1. Analyze periodic investments")
+
+def compare_to_economic_indicators(commodity_data, economic_series_id):
+    """
+    Compares commodity data to a selected economic indicator.
+    Args:
+    - commodity_data (pd.DataFrame): A DataFrame containing commodity prices with dates as index.
+    - economic_series_id (str): The FRED series ID to compare against.
+
+    Returns:
+    - None: Displays the comparison plot.
+    """
+    # Get the start and end dates from the commodity data
+    start_date = commodity_data.index.min().strftime('%Y-%m-%d')
+    end_date = commodity_data.index.max().strftime('%Y-%m-%d')
+
+    # Fetch economic data from FRED using the provided series ID and date range from commodity data
+    economic_data = get_economic_data(economic_series_id, start_date=start_date, end_date=end_date)
+
+    # Ensure we have valid data before proceeding
+    if economic_data.empty:
+        print(f"No data fetched for the series ID: {economic_series_id}. Please check the ID or try a different one.")
+        return
+
+    # Check for variations of 'date' column names
+    date_col = next((col for col in ['date', 'DATE', 'Date'] if col in economic_data.columns), None)
+    if date_col is None:
+        raise KeyError(f"No 'date' column found in economic data for {economic_series_id}. Available columns: {economic_data.columns}")
+
+    # Convert the correct date column to datetime format
+    economic_data[date_col] = pd.to_datetime(economic_data[date_col])
+
+    # Ensure the commodity data index is in datetime format
+    commodity_data.index = pd.to_datetime(commodity_data.index)
+
+    # Set the date column as index for economic data
+    economic_data.set_index(date_col, inplace=True)
+
+    # Check for the 'value' column in economic data
+    if 'value' not in economic_data.columns:
+        print(f"No 'value' column found in the economic data for series {economic_series_id}. Available columns: {economic_data.columns}")
+        return
+
+    # Reindex economic data to match commodity data dates and fill missing values
+    economic_data = economic_data.reindex(commodity_data.index, method='ffill').dropna()
+
+    # Merge the data on index
+    merged_data = pd.concat([commodity_data, economic_data['value']], axis=1, join='inner')
+
+    # Check if the merged data is empty after the join
+    if merged_data.empty:
+        print(f"No overlapping data between the commodity data and {economic_series_id} indicator. Please check the date range or data sources.")
+        return
+
+    # Set base price to 100 for both indices
+    base_commodity_value = merged_data.iloc[0, 0]  # First commodity price
+    base_economic_value = merged_data['value'].iloc[0]  # First economic value
+
+    merged_data['commodity_index'] = (merged_data.iloc[:, 0] / base_commodity_value) * 100
+    merged_data['economic_index'] = (merged_data['value'] / base_economic_value) * 100
+
+    # Plotting the two indexed series together
+    def quarter_format(x, pos=None):
+        date = mdates.num2date(x)
+        return f"{date.year}-Q{(date.month-1)//3 + 1}"
+
+    # Plotting
+    fig, ax = plt.subplots(figsize=(15, 8))
+    ax.plot(merged_data.index, merged_data['commodity_index'], label='Commodity Price Index', color='blue')
+    ax.plot(merged_data.index, merged_data['economic_index'], label=f'{economic_series_id} Indicator Index', color='orange')
+
+    # Formatting x-axis for quarterly labels
+    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 4, 7, 10]))
+    ax.xaxis.set_major_formatter(FuncFormatter(quarter_format))
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=45, ha='right')
+
+    # Ensure a reasonable number of x-axis labels
+    fig.autofmt_xdate()
+
+    # Add minor ticks for each month
+    ax.xaxis.set_minor_locator(mdates.MonthLocator())
+    ax.grid(which='minor', linestyle=':', linewidth='0.5', color='gray')
+
+    plt.xlabel('Date')
+    plt.ylabel('Index Value')
+    plt.title(f'Commodity Price Index vs {economic_series_id} Indicator Index (Base = 100)')
+    plt.legend()
+    plt.grid(which='major')
+    plt.tight_layout()
+    plt.show()
